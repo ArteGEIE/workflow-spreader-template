@@ -1,0 +1,17 @@
+name: Code Quality Check
+
+on:
+  push:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    name: "🛡 Python Code Quality"
+    steps:
+    - name: "📩 Checkout Project"
+      uses: actions/checkout@v2
+
+    - name: "🛡 Python Linting"
+      uses: alexanderdamiani/pylinter@v1.2.0
+      with:
+        skip-mypy: true

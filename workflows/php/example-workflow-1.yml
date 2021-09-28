@@ -1,0 +1,12 @@
+name: php/example-workflow-1.yml
+
+on:
+  push:
+
+jobs:
+  check-conventions:
+    runs-on: ubuntu-latest
+    steps:
+    - name: "Echoing"
+      shell: bash
+      run: echo "🎉 This job was here - example workflow 1"

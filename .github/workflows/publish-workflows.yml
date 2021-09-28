@@ -1,0 +1,30 @@
+name: Publish Workflows to Slave Repositories
+
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    name: "🔄 Spreading Workflows"
+    steps:
+    - name: "📩 Checkout Project"
+      uses: actions/checkout@v2
+    - name: "📦 Setup Python Environment"
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+        architecture: 'x64'
+    - name: "🛒 Installing Tool Dependencies"
+      shell: bash
+      run: |
+        pip install -r bin/requirements.txt
+    - name: "🔄 Spreading Workflows"
+      shell: bash
+      run: |
+        python bin/main.py
+      env:
+        GITHUB_TOKEN: ${{ secrets.WORKFLOW_SPREADER_ACCESS_TOKEN }}
+        WORKFLOW_CONFIG_PATH: ${{ secrets.WORKFLOW_CONFIG_PATH }}
