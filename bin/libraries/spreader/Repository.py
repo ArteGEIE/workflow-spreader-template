@@ -250,6 +250,9 @@ class Repository:
                 return False
 
         except GithubException as ex:
-            print(f"An error occured during file copy: {str(ex)}")
+            Common.github_output(
+                'error',
+                f"An error occured during file copy: {str(ex)}"
+            )
 
             return False
