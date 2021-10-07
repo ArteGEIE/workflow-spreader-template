@@ -39,20 +39,28 @@ class Organization:
 
         else:
             if os.getenv('GITHUB_REPOSITORY'):
-                # Get the Organization Name
-                org_name = github_connector.get_repo(
-                    os.getenv('GITHUB_REPOSITORY')
-                ).organization.login
 
-                # Get the Organization from API
-                self.org = github_connector.get_organization(
-                    org_name
-                )
+                org_name = os.getenv('GITHUB_REPOSITORY').split('/')[0]
+
+                try:
+                    # Get the Organization from API
+                    self.org = github_connector.get_organization(
+                        org_name
+                    )
+
+                except github.GithubException:
+                    Common.github_output(
+                        'error',
+                        'Could not retrieve Organization, maybe is Token'
+                        'too restrictive ?'
+                    )
+                    sys.exit(1)
 
             else:
                 Common.github_output(
                     'error',
-                    'Could not retrieve Organization Name'
+                    'Could not retrieve Organization Name '
+                    'from GITHUB_REPOSITORY'
                 )
                 sys.exit(1)
 
