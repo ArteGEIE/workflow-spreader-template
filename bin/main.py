@@ -86,8 +86,14 @@ if __name__ == "__main__":
                     config.data['incoming-changes']['commit-name']
                 )
 
-            repository.create_pr(
+            pr_create_result = repository.create_pr(
                 config.data['incoming-changes']['branch-name'],
                 config.data['incoming-changes']['pull-request']['title'],
                 'Workflow Automatic Update trigger'
             )
+
+            if not pr_create_result:
+                Common.github_output(
+                    'error',
+                    "Could not create Pull Request"
+                )
