@@ -95,7 +95,7 @@ class Repository:
         for pr in prs:
             if pr.head.ref == branch_name:
                 return True
-        
+
         return False
 
     def create_pr(self, branch_name, title, comment):
