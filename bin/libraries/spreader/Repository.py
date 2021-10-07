@@ -89,11 +89,14 @@ class Repository:
         '''
 
         prs = self.github_repository.get_pulls(
-            head=branch_name,
             state="open"
         )
 
-        return bool(prs.totalCount > 0)
+        for pr in prs:
+            if pr.head.ref == branch_name:
+                return True
+        
+        return False
 
     def create_pr(self, branch_name, title, comment):
         '''
@@ -141,7 +144,12 @@ class Repository:
         Checks if a file exists on a branch
         '''
 
-        return bool(self.get_file(branch_name, path))
+        return bool(
+            self.get_file(
+                branch_name=branch_name,
+                path=path
+            )
+        )
 
     def get_file(self, path, branch_name=None):
         '''
@@ -204,7 +212,10 @@ class Repository:
 
                     # If the file exists, we want to update it
                     # instead of creating
-                    if self.file_exists(branch_name, to_path):
+                    if self.file_exists(
+                        branch_name=branch_name,
+                        path=to_path
+                    ):
                         print(
                             f"   » Updating {path} in "
                             f"{self.github_repository.full_name}:{to_path}"
@@ -213,8 +224,8 @@ class Repository:
                         # We need the SHA of the previous file
                         # to do the commit
                         file = self.get_file(
-                            branch_name,
-                            to_path
+                            branch_name=branch_name,
+                            path=to_path
                         )
 
                         self.github_repository.update_file(

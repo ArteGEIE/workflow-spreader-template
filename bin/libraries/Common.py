@@ -37,7 +37,9 @@ class Common:
         Returns False if there is no change between files, True otherwise
         '''
 
-        local_hash = Common.hash_file(local_file)
+        local_hash = Common.hash_file(
+            path=local_file
+        )
         remote_hash = repository.hash_file(
             path=remote_file,
             branch_name=branch_name
