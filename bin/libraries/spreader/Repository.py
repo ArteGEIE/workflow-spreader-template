@@ -83,9 +83,9 @@ class Repository:
 
             return False
 
-    def has_branch_pr(self, branch_name):
+    def get_branch_pr(self, branch_name):
         '''
-        Checks if a Pull Request already exists for a Branch on Repository
+        Fetch the PR for Branch
         '''
 
         prs = self.github_repository.get_pulls(
@@ -94,9 +94,20 @@ class Repository:
 
         for pr in prs:
             if pr.head.ref == branch_name:
-                return True
+                return pr
 
         return False
+
+    def has_branch_pr(self, branch_name):
+        '''
+        Checks if a Pull Request already exists for a Branch on Repository
+        '''
+
+        return bool(
+            self.get_branch_pr(
+                branch_name=branch_name
+            )
+        )
 
     def create_pr(self, branch_name, title, comment):
         '''
@@ -105,27 +116,24 @@ class Repository:
         '''
 
         if self.has_branch_pr(branch_name):
-            # Lookup Repository Pull Requests
-            prs = self.github_repository.get_pulls(
-                head=branch_name,
-                state="open"
+
+            pr = self.get_branch_pr(
+                branch_name=branch_name
             )
 
-            # There might be no Pull Request at all
-            if prs.totalCount > 0:
-                # Beware, Pull Request ID is not stored under
-                # id property, but under number
-                pull_request_id = prs[0].number
+            # Beware, Pull Request ID is not stored under
+            # id property, but under number
+            pull_request_id = pr.number
 
-                # Pushing a message to a Pull Request is using
-                # Issue API in GithubAPIv3
-                self.github_repository \
-                    .get_issue(pull_request_id) \
-                    .create_comment(
-                        body=comment
-                    )
+            # Pushing a message to a Pull Request is using
+            # Issue API in GithubAPIv3
+            self.github_repository \
+                .get_issue(pull_request_id) \
+                .create_comment(
+                    body=comment
+                )
 
-                return True
+            return True
 
         else:
             self.github_repository.create_pull(
@@ -136,8 +144,6 @@ class Repository:
             )
 
             return True
-
-        return False
 
     def file_exists(self, branch_name, path):
         '''
