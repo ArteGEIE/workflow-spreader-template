@@ -2,6 +2,9 @@ name: Code Quality Check
 
 on:
   push:
+    paths:
+      - 'bin/*.py'
+      - 'bin/libraries/**/*.py'
 
 jobs:
   quality:
