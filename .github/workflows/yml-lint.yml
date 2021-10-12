@@ -1,0 +1,19 @@
+name: Check Workflows YAML Syntax
+
+on:
+  push:
+    paths:
+    - 'workflows/**/*.yml'
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+    - name: "📩 Checkout Project"
+      uses: actions/checkout@v2
+
+    - name: "👀 Linting YAML Files"
+      uses: ibiqlik/action-yamllint@v3
+      with:
+        file_or_dir: workflows/**/*.yml
+        config_file: .yamllint.yml
