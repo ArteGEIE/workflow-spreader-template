@@ -125,6 +125,14 @@ class Repository:
             # id property, but under number
             pull_request_id = pr.number
 
+            # If the configured PR title differs, update it
+            if pr.title != title:
+                self.github_repository \
+                    .get_issue(pull_request_id) \
+                    .edit(
+                        title=title
+                    )
+
             # Pushing a message to a Pull Request is using
             # Issue API in GithubAPIv3
             self.github_repository \

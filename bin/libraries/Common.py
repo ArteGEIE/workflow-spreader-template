@@ -7,8 +7,6 @@ import os
 import re
 from datetime import date
 
-from .Colors import Colors
-
 
 class Common:
 
@@ -18,17 +16,13 @@ class Common:
         Uses Colors for more joy
         '''
 
-        color = Colors.ENDC
+        debug_enabled = os.getenv('DEBUG', False)
 
-        if msg_type == 'warning':
-            color = Colors.WARNING
-
-        if msg_type == 'error':
-            color = Colors.FAIL
-
-        print(
-            f"{color}::{msg_type}::{msg_type.upper()}: {text}{Colors.ENDC}"
-        )
+        if (msg_type.upper() == 'DEBUG' and debug_enabled) \
+           or msg_type.upper() != 'DEBUG':
+            print(
+                f"::{msg_type.lower()}::{msg_type.upper()}: {text}"
+            )
 
     def diff_local_and_repo_files(
             repository, branch_name, local_file, remote_file):
