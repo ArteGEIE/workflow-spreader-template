@@ -4,6 +4,7 @@ Wrapper Class for the Workflow Spreader
 
 import os
 from json import JSONDecodeError, loads
+from pathlib import Path
 
 from jsonschema import ValidationError, validate
 
@@ -13,6 +14,7 @@ from ..Common import Common
 
 class Configuration:
     config_path = './configurations'
+    default_config_filename = '_default.json'
     remote_config_path = os.getenv(
         'WORKFLOW_CONFIG_PATH',
         '.github/.workflows.json'
@@ -56,7 +58,101 @@ class Configuration:
         self.repository_name = repository_name
         self.repository_type = repository_type
         self.path = path
-        self.data = data
+        self.data = self.upsert_default_configuration(
+            config_data=data
+        )
+
+    def load_default_configuration(self):
+        '''
+        Loads default configuration
+        '''
+
+        default_configfile = Path(
+            f"{os.getcwd()}/{Configuration.config_path}"
+            f"/{Configuration.default_config_filename}"
+        )
+
+        if default_configfile.is_file():
+            with open(default_configfile, 'r', encoding='UTF-8') as file:
+                file_content = file.read()
+
+                try:
+                    return loads(file_content)
+
+                except TypeError:
+                    return None
+
+                except JSONDecodeError:
+                    return None
+
+        return None
+
+    def upsert_default_configuration(self, config_data):
+        '''
+        Upsert Repository Configuration if missing Configuration Datas
+        '''
+
+        default_config = self.load_default_configuration()
+        upserted_config = config_data
+
+        # If there is no default config, return the original config datas
+        if not config_data or 'incoming-changes' not in default_config:
+            return config_data
+
+        # first case : Repo config file omits all the incoming-changes config
+        if 'incoming-changes' not in config_data:
+            Common.github_output(
+                "debug",
+                "Upserted All Configuration from Default Values"
+            )
+
+            upserted_config['incoming-changes'] = \
+                default_config['incoming-changes']
+
+        # second case : Repo config file has incoming-changes,
+        # so we have to cherry-pick
+        else:
+
+            if 'branch-name' not in config_data['incoming-changes'] \
+               and 'branch-name' in default_config['incoming-changes']:
+
+                upserted_config['incoming-changes']['branch-name'] = \
+                    default_config['incoming-changes']['branch-name']
+
+                Common.github_output(
+                    "debug",
+                    "Upserted Configuration "
+                    "incoming-changes.branch-name "
+                    "from Default Values"
+                )
+
+            if 'commit-name' not in config_data['incoming-changes'] \
+               and 'commit-name' in default_config['incoming-changes']:
+
+                upserted_config['incoming-changes']['commit-name'] = \
+                    default_config['incoming-changes']['commit-name']
+
+                Common.github_output(
+                    "debug",
+                    "Upserted Configuration "
+                    "incoming-changes.commit-name "
+                    "from Default Values"
+                )
+
+            if 'pull-request' not in config_data['incoming-changes'] \
+               and 'pull-request' in default_config['incoming-changes']:
+
+                upserted_config['incoming-changes']['pull-request'] = \
+                    default_config['incoming-changes']['pull-request']
+
+                Common.github_output(
+                    "debug",
+                    "Upserted Configuration "
+                    "incoming-changes.pull-request "
+                    "from Default Values"
+                )
+
+        return upserted_config
 
     def validate_configuration_schema(self):
         '''
@@ -119,7 +215,9 @@ class Configuration:
         configurations = []
 
         for config in os.listdir(f"{os.getcwd()}/{Configuration.config_path}"):
-            if config.endswith('.json'):
+            if config.endswith('.json') and \
+               config != Configuration.default_config_filename:
+
                 configuration_path = f"{Configuration.config_path}/{config}"
 
                 with open(configuration_path, 'r', encoding='UTF-8') as file:
@@ -172,7 +270,8 @@ class Configuration:
                 if not config.validate_configuration_schema():
                     Common.github_output(
                         "error",
-                        f"Workflow Configuration {config.path} invalid."
+                        f"Workflow Configuration {config.path} "
+                        "does not respect the JSON Scheme."
                     )
 
                 else:
@@ -187,6 +286,13 @@ class Configuration:
                         )
 
                         configurations[config.repository_name] = config
+
+                    else:
+                        print(
+                            f" » Repository {Colors.OKCYAN}"
+                            f"{config.repository_name}{Colors.ENDC} has"
+                            " disabled Workflow Auto-Update ..."
+                        )
 
         if len(configurations) == 0:
             print(
