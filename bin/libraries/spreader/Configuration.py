@@ -44,6 +44,9 @@ class Configuration:
                     }
                 }
             },
+            "reviewers": {
+                "type": "array"
+            },
             "workflows": {
                 "type": "array"
             }
