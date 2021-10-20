@@ -66,10 +66,28 @@ In all cases, the JSON file must have this structure :
        "title": "pull-request-title"
     }
   },
+  "reviewers": [
+    "first-team",
+    "second-team"
+  ],
   "workflows": [
     "common/check-conventional-naming",
     "php/example-workflow-1"
   ]
+}
+```
+
+The `incoming-changes` node is not mandatory if you have setted up a default configuration in `./configurations/_default.json` file :
+
+```json
+{
+  "incoming-changes": {
+    "branch-name": "created-branch-with-workflows",
+    "commit-name": "commit-text",
+    "pull-request": {
+       "title": "pull-request-title"
+    }
+  }
 }
 ```
 
@@ -81,6 +99,7 @@ The Spreader is validating this format and all invalid Configurations will be ig
 | `incoming-changes.branch-name`        | `string`            | Name of the Branch that will be created by the Spreader, where will be commited the workflow changes. |
 | `incoming-changes.commit-name`        | `string`            | Template to use in commit text when a workflow is updated. |
 | `incoming-changes.pull-request.title` | `string`            | Name of the Pull Request that will be created by the Spreader. |
+| `reviewers`                           | `array` of `string` | List of Teams that will be associated to PR Review. The Team must be assigned to the Github Project or it will be ignored. |
 | `workflows`                           | `array` of `string` | Array of Workflows that will be spread in the Repository on Master Repo update. |
 
 #### Templating

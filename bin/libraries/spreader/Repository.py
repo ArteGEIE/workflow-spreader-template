@@ -5,7 +5,7 @@ Wrapper Class for the Workflow Spreader
 import hashlib
 import os
 
-from github import GithubException
+from github import GithubException, Team
 
 from ..Colors import Colors
 from ..Common import Common
@@ -109,7 +109,7 @@ class Repository:
             )
         )
 
-    def create_pr(self, branch_name, title, comment):
+    def create_pr(self, branch_name, title, comment, reviewers=None):
         '''
         Create or Update a Pull Request for the Branch
         => Post that PR with Title and Initial Comment
@@ -133,6 +133,12 @@ class Repository:
                         title=title
                     )
 
+            # Check the Reviewers for the PR
+            self.setup_review_team(
+                pr=pr,
+                reviewers=reviewers
+            )
+
             # Pushing a message to a Pull Request is using
             # Issue API in GithubAPIv3
             self.github_repository \
@@ -144,14 +150,45 @@ class Repository:
             return True
 
         else:
-            self.github_repository.create_pull(
+            pr = self.github_repository.create_pull(
                 title=title,
                 body=comment,
                 head=branch_name,
                 base=self.github_repository.default_branch
             )
 
+            # Check the Reviewers for the PR
+            self.setup_review_team(
+                pr=pr,
+                reviewers=reviewers
+            )
+
             return True
+
+    def setup_review_team(self, pr, reviewers):
+        '''
+        Assign teams to PR for review action
+        '''
+
+        pr_reviewers = []
+        pr_all_reviewers = pr.get_review_requests()
+
+        # the Teams are in the Tuple, position 1
+        for pr_reviewer in pr_all_reviewers[1]:
+            if type(pr_reviewer) is Team.Team:
+                pr_reviewers.append(pr_reviewer.slug)
+
+        # Does the current reviewer list contain the asked reviewers?
+        reviewer_intersect = [
+            value for value in pr_reviewers
+            if value in reviewers
+        ]
+
+        if reviewer_intersect != reviewers:
+            pr.create_review_request(
+                # concatenate the original list of reviewers
+                team_reviewers=pr_reviewers + reviewers
+            )
 
     def file_exists(self, branch_name, path):
         '''

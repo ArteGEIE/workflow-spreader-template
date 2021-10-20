@@ -87,9 +87,13 @@ if __name__ == "__main__":
                 )
 
             pr_create_result = repository.create_pr(
-                config.data['incoming-changes']['branch-name'],
-                config.data['incoming-changes']['pull-request']['title'],
-                'Workflow Automatic Update trigger'
+                branch_name=config.data['incoming-changes']['branch-name'],
+                title=config.data['incoming-changes']['pull-request']['title'],
+                comment='Workflow Automatic Update trigger',
+                reviewers=(
+                    config.data['reviewers'] if 'reviewers' in config.data
+                    else []
+                )
             )
 
             if not pr_create_result:

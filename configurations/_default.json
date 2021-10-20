@@ -1,0 +1,9 @@
+{
+    "incoming-changes": {
+        "branch-name": "incoming-github-workflows",
+        "commit-name": "workflows: update Github Action Workflow {file}",
+        "pull-request": {
+            "title": "workflows: update Github Action Workflows"
+        }
+    }
+}
